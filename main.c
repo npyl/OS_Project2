@@ -5,11 +5,14 @@
 #include <sys/mman.h>   // shm_open, mmap, munmap
 #include <semaphore.h>
 
+#include "b+-tree.h"
+
 #define MIN_CHILDREN 1
 #define MAX_CHILDREN 1000
 
 // shared
 static int *p = NULL;
+static bptree_node* root = NULL;
 
 void critical_region(int i)
 {
@@ -54,6 +57,9 @@ int main(int argc, char** argv)
 
     // make p shared
     p = mmap(NULL, sizeof(int), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+
+    // make b+-tree root shared
+    root = mmap(NULL, sizeof(bptree_node), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
 
     /*
      * Create N children.
@@ -103,6 +109,9 @@ int main(int argc, char** argv)
 
     // deallocate shared p
     munmap(p, sizeof(int));
+
+    // deallocate shared root
+    munmap(root, sizeof(bptree_node));
 
     return 0;
 }
