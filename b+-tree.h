@@ -12,8 +12,6 @@ typedef struct bptree_node_s {
     bptree_node* p_rightmost_leaf;  // δείκτης στο φύλλο δεξιά (εννοείται, είμαι κόμβος-φύλλο)
 } bptree_node;
 
-int             bptree_get_next_leaf_data();
-
 /*
  * bptree_search
  * 
@@ -23,3 +21,15 @@ int             bptree_get_next_leaf_data();
  * Returns NULL on failure.
  */
 bptree_node*    bptree_search(bptree_node*, int value);
+
+/*
+ * bptree_insert
+ * 
+ * Insert a value to a B+-Tree
+ */
+BOOL            bptree_insert(bptree_node*, int value);
+
+/*
+ * bptree_destroy
+ */
+void            bptree_destroy(bptree_node* root) {}

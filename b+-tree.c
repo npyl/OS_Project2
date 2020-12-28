@@ -2,7 +2,7 @@
 
 #include "b+-tree.h"
 
-bptree_node*    bptree_search(bptree_node* node, int value)
+bptree_node* bptree_search(bptree_node* node, int value)
 {
     int i = 1;
 
@@ -37,4 +37,11 @@ bptree_node*    bptree_search(bptree_node* node, int value)
 
     // else:
     return NULL;
+}
+
+BOOL bptree_insert(bptree_node* root, int value)
+{
+    bptree_node* bucket = bptree_search(root, value);
+    if (!bucket)
+        return FALSE;
 }

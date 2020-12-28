@@ -14,9 +14,11 @@
 static int *p = NULL;
 static bptree_node* root = NULL;
 
+int get_next_leaf_data(bptree_node* root) { return 1; }
+
 void critical_region(int i)
 {
-    *p += i;
+    *p += get_next_leaf_data(root);
 }
 
 int get_number_of_children(int argc, char** argv)
@@ -60,6 +62,17 @@ int main(int argc, char** argv)
 
     // make b+-tree root shared
     root = mmap(NULL, sizeof(bptree_node), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+
+    // Insert N random values to our B+-Tree
+    for (int i = 0; i < N; i++)
+    {
+        BOOL res = bptree_insert(root, rand())
+        if (!res)
+        {
+            printf("Failed to insert elements at B+-Tree. Exiting...\n");
+            _exit(EXIT_FAILURE);
+        }
+    }
 
     /*
      * Create N children.
@@ -112,6 +125,9 @@ int main(int argc, char** argv)
 
     // deallocate shared root
     munmap(root, sizeof(bptree_node));
+
+    // deallocate whole B+-Tree
+    bptree_destroy(root);
 
     return 0;
 }
