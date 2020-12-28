@@ -17,7 +17,9 @@ int             bptree_get_next_leaf_data();
 /*
  * bptree_search
  * 
- * Search for a value (will be found in a leaf, if existent)
+ * Search for a value (return leaf that contains it)
  * and use a specific node as root.
+ * 
+ * Returns NULL on failure.
  */
 bptree_node*    bptree_search(bptree_node*, int value);
