@@ -63,10 +63,13 @@ int main(int argc, char** argv)
     // make b+-tree root shared
     root = mmap(NULL, sizeof(bptree_node), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
 
+    // this initialisation is enough for our B+-Tree; kinda hacky but we are using mmap so we cannot malloc() twice!
+    root->is_leaf = TRUE;
+
     // Insert N random values to our B+-Tree
     for (int i = 0; i < N; i++)
     {
-        BOOL res = bptree_insert(root, rand());
+        BOOL res = bptree_insert(root, rand() % 50);
         if (!res)
         {
             printf("Failed to insert elements at B+-Tree. Exiting...\n");

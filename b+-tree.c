@@ -10,7 +10,6 @@
 void create_empty_leaf(bptree_node** new_leaf)
 {
     *new_leaf = malloc(sizeof(bptree_node));
-
     (*new_leaf)->is_leaf            = TRUE;
     (*new_leaf)->keys_count         = 0;
     (*new_leaf)->p_rightmost_leaf   = NULL;
@@ -74,6 +73,8 @@ bptree_node* bptree_search(bptree_node* node, int value)
  */
 BOOL bptree_insert(bptree_node* tree, int x)
 {
+printf ("inserting %d\n", x);
+
     bptree_node* leaf;
     bptree_node* leaf_parent;
 
@@ -89,7 +90,7 @@ BOOL bptree_insert(bptree_node* tree, int x)
 
         for (int i = 0; i < cursor->keys_count; i++)
         {
-            if (x > cursor->keys[i]) 
+            if (x > cursor->keys[i])
             {
                 cursor = cursor->children[i];
                 break;
