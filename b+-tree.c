@@ -16,6 +16,11 @@ void create_empty_leaf(bptree_node** new_leaf)
     (*new_leaf)->p_rightmost_leaf   = NULL;
 }
 
+BOOL _bptree_insert(int x, bptree_node* leaf, bptree_node* parent, bptree_node** p_new_leaf)
+{
+    return FALSE;
+}
+
 //
 //========================================================
 //
@@ -82,7 +87,7 @@ BOOL bptree_insert(bptree_node* tree, int x)
     {
         leaf_parent = cursor;
 
-        for (int i = 0; i = cursor->keys_count; i++)
+        for (int i = 0; i < cursor->keys_count; i++)
         {
             if (x > cursor->keys[i]) 
             {
@@ -98,6 +103,17 @@ BOOL bptree_insert(bptree_node* tree, int x)
 
     // We have found our leaf
     leaf = cursor;
+
+    bptree_node* p_new_leaf = NULL;
+
+    // Now use our internal insert to do the heavy lifting!
+    BOOL res = _bptree_insert(x, leaf, leaf_parent, &p_new_leaf);
+    if (!res)
+        return FALSE;
+
+    // insert() required splitting; we should connect old leaf to new leaf!
+    if (p_new_leaf != NULL)
+        leaf->p_rightmost_leaf = p_new_leaf;
 
     return FALSE;
 }
