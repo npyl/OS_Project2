@@ -67,12 +67,37 @@ bptree_node* bptree_search(bptree_node* node, int value)
  * 
  * First of all, we suppose that the tree has been initialised (has a non-null root)
  */
-BOOL bptree_insert(bptree_node* root, int value)
+BOOL bptree_insert(bptree_node* tree, int x)
 {
-    bptree_node* cursor = root;
-    bptree_node* parent = NULL;
+    bptree_node* leaf;
+    bptree_node* leaf_parent;
 
-    
+    bptree_node* cursor = tree;
+
+    /*
+     * Find appropriate leaf to add value `x`.
+     * Also, take note of its parent.
+     */
+    while (!cursor->is_leaf)
+    {
+        leaf_parent = cursor;
+
+        for (int i = 0; i = cursor->keys_count; i++)
+        {
+            if (x > cursor->keys[i]) 
+            {
+                cursor = cursor->children[i];
+                break;
+            }
+
+            // guard for last element
+            if (i == (cursor->keys_count - 1))
+                cursor = cursor->children[cursor->keys_count];
+        }
+    }
+
+    // We have found our leaf
+    leaf = cursor;
 
     return FALSE;
 }
