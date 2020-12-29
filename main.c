@@ -66,7 +66,7 @@ int main(int argc, char** argv)
     // Insert N random values to our B+-Tree
     for (int i = 0; i < N; i++)
     {
-        BOOL res = bptree_insert(root, rand())
+        BOOL res = bptree_insert(root, rand());
         if (!res)
         {
             printf("Failed to insert elements at B+-Tree. Exiting...\n");

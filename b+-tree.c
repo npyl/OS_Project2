@@ -1,6 +1,29 @@
 #include <stdio.h>
+#include <malloc.h>
 
 #include "b+-tree.h"
+
+//
+// Helpers
+//
+
+void create_empty_leaf(bptree_node** new_leaf)
+{
+    *new_leaf = malloc(sizeof(bptree_node));
+
+    (*new_leaf)->is_leaf            = TRUE;
+    (*new_leaf)->keys_count         = 0;
+    (*new_leaf)->p_rightmost_leaf   = NULL;
+}
+
+//
+//========================================================
+//
+
+void bptree_init(bptree_node* root)
+{
+    create_empty_leaf(&root);
+}
 
 bptree_node* bptree_search(bptree_node* node, int value)
 {
@@ -21,27 +44,37 @@ bptree_node* bptree_search(bptree_node* node, int value)
      * Find correct (ki, ki+1) range (where ki, ki+1 keys)
      */
     if (value <= node->keys[0])
-        return bptree_search(&(node->children[0]), value);
+        return bptree_search(node->children[0], value);
 
     else if ((value > node->keys[0]) && (value < node->keys[node->keys_count - 1]))
     {
         int i = 1;
         while ((i < node->keys_count) && (value > node->keys[i]))
             i++;
-        bptree_search(&(node->children[i]), value);
+        bptree_search(node->children[i], value);
     }
-    else if (value >= node->keys)
+    else if (value >= node->keys[node->keys_count - 1])
     {
-        return bptree_search(&(node->children[node->keys_count - 1]), value);
+        return bptree_search(node->children[node->keys_count - 1], value);
     }
 
     // else:
     return NULL;
 }
 
+/*
+ * bptree_insert()
+ * 
+ * First of all, we suppose that the tree has been initialised (has a non-null root)
+ */
 BOOL bptree_insert(bptree_node* root, int value)
 {
-    bptree_node* bucket = bptree_search(root, value);
-    if (!bucket)
-        return FALSE;
+    bptree_node* cursor = root;
+    bptree_node* parent = NULL;
+
+    
+
+    return FALSE;
 }
+
+void bptree_destroy(bptree_node* root) {}
