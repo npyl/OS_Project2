@@ -41,25 +41,43 @@ BOOL _bptree_insert(int x, bptree_node* leaf, bptree_node* parent, bptree_node**
     }
     else
     {
-        // position to insert key; everything rightmost must be shifted one position right!
+        /* position to insert key */
         int j = 0;
 
         bptree_node* cursor = leaf;
 
+        /*
+         * There are 3 cases:
+         *  1. x must be inserted inside a series of keys (=> j must be found, and then we need to shift right all the rightmost elements)
+         *  2. must be inserted after this series (=> j = keys_count which is practically the end of the series +1)
+         *  3. no keys have been inserted (=> j = keys_count = 0)
+         * 
+         * This flag is TRUE for 1. and FALSE for 2. (and 3.).
+         */
+        BOOL must_shift_position = FALSE;
+
         /* find where to put kj */
         for (int i = 0; i < cursor->keys_count; i++)
         {
-            if (x > cursor->keys[i])
+            if (x < cursor->keys[i])
             {
                 j = i;
+                must_shift_position = TRUE;
                 break;
             }
         }
 
         /* move all keys rightmost to kj one position right */
-        for (int k = cursor->keys_count - 1; k > j; k--)
+        if (must_shift_position)
         {
-            cursor->keys[k] = cursor->keys[k - 1];
+            for (int k = cursor->keys_count; k > j; k--)
+            {
+                cursor->keys[k] = cursor->keys[k - 1];
+            }
+        }
+        else
+        {
+            j = cursor->keys_count;
         }
 
         /* add new key */

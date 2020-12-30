@@ -127,6 +127,7 @@ int main(int argc, char** argv)
     // Once every child has exited, print p
     printf("p = %d\n", *p);
 
+    // (for debugging purposes)
     for (int i = 0; i < root->keys_count; i++)
     {
         printf("key[%d] = %d\n", i, root->keys[i]);
