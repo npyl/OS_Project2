@@ -2,6 +2,19 @@
 #include <malloc.h>
 
 #include "b+-tree.h"
+#include "stack.h"
+
+/*
+ * split() on a leaf requires knowledge of two things: 
+ *      1. the leaf 
+ *      2. its parent
+ * Since, in order to acquire a leaf, we've already executed
+ *      a search in bptree_insert(), it is a smart approach
+ *      to have this specific function populate an ancestry
+ *      stack with the parents, grandparents, and so on... of
+ *      that leaf.
+ */
+stack _leaf_ancestry;
 
 //
 // Helpers
@@ -15,8 +28,35 @@ void create_empty_leaf(bptree_node** new_leaf)
     (*new_leaf)->p_rightmost_leaf   = NULL;
 }
 
+bptree_node* get_next_leaf_ancestor() {
+    return stack_pop(&_leaf_ancestry);
+}
+
 BOOL _bptree_insert(int x, bptree_node* leaf, bptree_node* parent, bptree_node** p_new_leaf)
 {
+    if ((leaf->keys_count + 1) > BPTREE_MAX_KEYS)
+    {
+        // this is gonna be trouble...
+    }
+    else
+    {
+        // position to insert key; everything rightmost must be shifted one position right!
+        int j = 0;
+
+        // for (int i = 0; i < cursor->keys_count; i++)
+        // {
+        //     if (x > cursor->keys[i])
+        //     {
+        //         cursor = cursor->children[i];
+        //         break;
+        //     }
+
+        //     // guard for last element
+        //     if (i == (cursor->keys_count - 1))
+        //         cursor = cursor->children[cursor->keys_count];
+        // }
+    }
+
     return FALSE;
 }
 
@@ -27,6 +67,8 @@ BOOL _bptree_insert(int x, bptree_node* leaf, bptree_node* parent, bptree_node**
 void bptree_init(bptree_node* root)
 {
     create_empty_leaf(&root);
+
+    stack_init(&_leaf_ancestry);
 }
 
 bptree_node* bptree_search(bptree_node* node, int value)
@@ -73,7 +115,7 @@ bptree_node* bptree_search(bptree_node* node, int value)
  */
 BOOL bptree_insert(bptree_node* tree, int x)
 {
-printf ("inserting %d\n", x);
+    printf ("inserting %d\n", x);
 
     bptree_node* leaf;
     bptree_node* leaf_parent;
@@ -87,6 +129,9 @@ printf ("inserting %d\n", x);
     while (!cursor->is_leaf)
     {
         leaf_parent = cursor;
+
+        /* populate our registry of leaf ancestors */
+        stack_push(&_leaf_ancestry, leaf_parent);
 
         for (int i = 0; i < cursor->keys_count; i++)
         {
@@ -119,4 +164,6 @@ printf ("inserting %d\n", x);
     return FALSE;
 }
 
-void bptree_destroy(bptree_node* root) {}
+void bptree_destroy(bptree_node* root) {
+    stack_deinit(&_leaf_ancestry);
+}

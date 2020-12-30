@@ -7,6 +7,7 @@ typedef int BOOL;
 #define BPTREE_MAX_KEYS         5
 #define BPTREE_MAX_CHILDREN     (BPTREE_MAX_KEYS + 1)
 
+/* forward declaration */
 typedef struct bptree_node_s bptree_node;
 
 typedef struct bptree_node_s {

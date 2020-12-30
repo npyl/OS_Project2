@@ -3,12 +3,19 @@
 #include <stdio.h>
 #include <malloc.h>
 
-void* pop(stack* stack) {
+void stack_init(stack* stack) {
+    stack->root = malloc(sizeof(stack));
+    stack->root->next = NULL;
+    stack->root->data = NULL;
+    stack->size = 1;
+}
+
+void* stack_pop(stack* stack) {
     stack_node* cursor = stack->root;
     stack_node* parent = NULL;
 
-    /* we can't go negative! */
-    if (stack->size == 0)
+    /* we can't go <= 0; root is sentinel and below zero is irrational! */
+    if (stack->size == 1)
         return NULL;
 
     /* find stack tail */
@@ -27,7 +34,7 @@ void* pop(stack* stack) {
     return cursor;
 }
 
-void push(stack* stack, void* data) {
+void stack_push(stack* stack, void* data) {
     stack_node* cursor = stack->root;
     stack_node* parent = NULL;
 
@@ -48,4 +55,13 @@ void push(stack* stack, void* data) {
 
     /* increase size */
     stack->size++;
+}
+
+void stack_deinit(stack* s) {
+    /* deallocate our stack; should stop when stack_pop() returns NULL; eg. stack is empty */
+    while (stack_pop(s))
+        ;
+
+    /* don't forget to free the sentinel! */
+    free(s->root);
 }
