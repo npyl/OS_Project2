@@ -14,7 +14,14 @@
 static int *p = NULL;
 static bptree_node* root = NULL;
 
-int get_next_leaf_data(bptree_node* root) { return 1; }
+int get_next_leaf_data(bptree_node* root) { 
+    int sum = 0;
+    for (int i = 0; i < root->keys_count; i++)
+    {
+        sum += root->keys[i];
+    }
+    return sum; 
+}
 
 void critical_region(int i)
 {
@@ -119,6 +126,11 @@ int main(int argc, char** argv)
 
     // Once every child has exited, print p
     printf("p = %d\n", *p);
+
+    for (int i = 0; i < root->keys_count; i++)
+    {
+        printf("key[%d] = %d\n", i, root->keys[i]);
+    }
 
     // sem_destroy or munmap??
     sem_destroy(sem);

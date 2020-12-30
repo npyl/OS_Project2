@@ -18,7 +18,7 @@
  *      stack with the parents, grandparents, and so on... of
  *      that leaf.
  */
-stack _leaf_ancestry;
+static stack _leaf_ancestry;
 
 bptree_node* get_next_leaf_ancestor()
 {
@@ -44,21 +44,29 @@ BOOL _bptree_insert(int x, bptree_node* leaf, bptree_node* parent, bptree_node**
         // position to insert key; everything rightmost must be shifted one position right!
         int j = 0;
 
-        // for (int i = 0; i < cursor->keys_count; i++)
-        // {
-        //     if (x > cursor->keys[i])
-        //     {
-        //         cursor = cursor->children[i];
-        //         break;
-        //     }
+        bptree_node* cursor = leaf;
 
-        //     // guard for last element
-        //     if (i == (cursor->keys_count - 1))
-        //         cursor = cursor->children[cursor->keys_count];
-        // }
+        /* find where to put kj */
+        for (int i = 0; i < cursor->keys_count; i++)
+        {
+            if (x > cursor->keys[i])
+            {
+                j = i;
+                break;
+            }
+        }
+
+        /* move all keys rightmost to kj one position right */
+        for (int k = cursor->keys_count - 1; k > j; k--)
+        {
+            cursor->keys[k] = cursor->keys[k - 1];
+        }
+
+        /* add new key */
+        cursor->keys[j] = x;
     }
 
-    return FALSE;
+    return TRUE;
 }
 
 //
@@ -158,13 +166,17 @@ BOOL bptree_insert(bptree_node* tree, int x)
     if (!res)
         return FALSE;
 
+    // increment keys counter
+    leaf->keys_count++;
+
     // insert() required splitting; we should connect old leaf to new leaf!
     if (p_new_leaf != NULL)
         leaf->p_rightmost_leaf = p_new_leaf;
 
-    return FALSE;
+    return TRUE;
 }
 
 void bptree_destroy(bptree_node* root) {
-    stack_deinit(&_leaf_ancestry);
+    // TODO: fix this causing seg-fault;
+    // stack_deinit(&_leaf_ancestry);
 }
