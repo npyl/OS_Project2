@@ -4,6 +4,10 @@
 #include "b+-tree.h"
 #include "stack.h"
 
+//
+// Helpers
+//
+
 /*
  * split() on a leaf requires knowledge of two things: 
  *      1. the leaf 
@@ -16,9 +20,10 @@
  */
 stack _leaf_ancestry;
 
-//
-// Helpers
-//
+bptree_node* get_next_leaf_ancestor()
+{
+    return stack_pop(&_leaf_ancestry);
+}
 
 void create_empty_leaf(bptree_node** new_leaf)
 {
@@ -26,10 +31,6 @@ void create_empty_leaf(bptree_node** new_leaf)
     (*new_leaf)->is_leaf            = TRUE;
     (*new_leaf)->keys_count         = 0;
     (*new_leaf)->p_rightmost_leaf   = NULL;
-}
-
-bptree_node* get_next_leaf_ancestor() {
-    return stack_pop(&_leaf_ancestry);
 }
 
 BOOL _bptree_insert(int x, bptree_node* leaf, bptree_node* parent, bptree_node** p_new_leaf)
