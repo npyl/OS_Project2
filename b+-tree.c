@@ -35,63 +35,40 @@ void create_empty_leaf(bptree_node** new_leaf)
 
 void split(bptree_node* leaf, bptree_node* parent, bptree_node** p_new_leaf)
 {
-    create_empty_leaf(*p_new_leaf);
+    // create_empty_leaf(*p_new_leaf);
 
     
 }
 
-BOOL _bptree_insert(int x, bptree_node* leaf, bptree_node* parent, bptree_node** p_new_leaf)
+void _bptree_insert(int x, bptree_node* leaf, bptree_node* parent, bptree_node** p_new_leaf)
 {
-    if (leaf->keys_count < BPTREE_MAX_KEYS)
+    if (leaf->keys_count == BPTREE_MAX_KEYS)
     {
-        split(leaf, parent, p_new_leaf);
+        // split(leaf, parent, p_new_leaf);
+        printf("shouldn't go in here!\n");
     }
     else
     {
         /* position to insert key */
-        int j = 0;
+        int i = 0;
 
         bptree_node* cursor = leaf;
 
-        /*
-         * There are 3 cases:
-         *  1. x must be inserted inside a series of keys (=> j must be found, and then we need to shift right all the rightmost elements)
-         *  2. must be inserted after this series (=> j = keys_count which is practically the end of the series +1)
-         *  3. no keys have been inserted (=> j = keys_count = 0)
-         * 
-         * This flag is TRUE for 1. and FALSE for 2. (and 3.).
-         */
-        BOOL must_shift_position = FALSE;
+        /* find where to put ki */
+        if (x < cursor->keys[0])
+            i = 0;
+        while (x > cursor->keys[i] && i < cursor->keys_count)
+            i++;
 
-        /* find where to put kj */
-        for (int i = 0; i < cursor->keys_count; i++)
+        /* move every key rightmost to ki to the right */
+        for (int k = cursor->keys_count; k > i; k--)
         {
-            if (x < cursor->keys[i])
-            {
-                j = i;
-                must_shift_position = TRUE;
-                break;
-            }
-        }
-
-        /* move all keys rightmost to kj one position right */
-        if (must_shift_position)
-        {
-            for (int k = cursor->keys_count; k > j; k--)
-            {
-                cursor->keys[k] = cursor->keys[k - 1];
-            }
-        }
-        else
-        {
-            j = cursor->keys_count;
+            cursor->keys[k] = cursor->keys[k - 1];
         }
 
         /* add new key */
-        cursor->keys[j] = x;
+        cursor->keys[i] = x;
     }
-
-    return TRUE;
 }
 
 //
@@ -187,9 +164,7 @@ BOOL bptree_insert(bptree_node* tree, int x)
     bptree_node* p_new_leaf = NULL;
 
     // Now use our internal insert to do the heavy lifting!
-    BOOL res = _bptree_insert(x, leaf, leaf_parent, &p_new_leaf);
-    if (!res)
-        return FALSE;
+    _bptree_insert(x, leaf, leaf_parent, &p_new_leaf);
 
     // increment keys counter
     leaf->keys_count++;
