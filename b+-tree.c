@@ -33,11 +33,18 @@ void create_empty_leaf(bptree_node** new_leaf)
     (*new_leaf)->p_rightmost_leaf   = NULL;
 }
 
+void split(bptree_node* leaf, bptree_node* parent, bptree_node** p_new_leaf)
+{
+    create_empty_leaf(*p_new_leaf);
+
+    
+}
+
 BOOL _bptree_insert(int x, bptree_node* leaf, bptree_node* parent, bptree_node** p_new_leaf)
 {
-    if ((leaf->keys_count + 1) > BPTREE_MAX_KEYS)
+    if (leaf->keys_count < BPTREE_MAX_KEYS)
     {
-        // this is gonna be trouble...
+        split(leaf, parent, p_new_leaf);
     }
     else
     {
@@ -160,6 +167,11 @@ BOOL bptree_insert(bptree_node* tree, int x)
         /* populate our registry of leaf ancestors */
         stack_push(&_leaf_ancestry, leaf_parent);
 
+        if (x < cursor->keys[0])
+        {
+            cursor = cursor->children[0];
+            continue;
+        }
         for (int i = 0; i < cursor->keys_count; i++)
         {
             if (x > cursor->keys[i])
