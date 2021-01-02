@@ -20,7 +20,7 @@ int get_next_leaf_data(bptree_node* root) {
     {
         sum += root->keys[i];
     }
-    return sum; 
+    return sum;
 }
 
 void critical_region(int i)

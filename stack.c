@@ -10,6 +10,16 @@ void stack_init(stack* st) {
     st->size = 1;
 }
 
+/*
+ * stack_root()
+ * 
+ * Return stack root's data.
+ * (remember: original root is a sentinel containing nothing!)
+ */
+void*   stack_root(stack* st) {
+    return st->root->next->data;
+}
+
 void* stack_pop(stack* st) {
     stack_node* cursor = st->root;
     stack_node* parent = NULL;
@@ -39,6 +49,34 @@ void* stack_pop(stack* st) {
     st->size--;
 
     return data;
+}
+
+void*   stack_read_top(stack* st) {
+    stack_node* cursor = st->root;
+    stack_node* parent = NULL;
+
+    /* we can't go <= 0; root is sentinel and below zero is irrational! */
+    if (st->size == 1)
+        return NULL;
+
+    /* find stack tail */
+    for (int j = 0; j < st->size; j++)
+    {
+        parent = cursor;
+        cursor = cursor->next;
+    }
+
+    /* invalidate tail */
+    parent->next = NULL;
+
+    /* reduce size */
+    st->size--;
+
+    return cursor->data;
+}
+
+void   stack_read_top_revert(stack* st) {
+    st->size++;
 }
 
 void stack_push(stack* st, void* data) {

@@ -4,7 +4,7 @@ typedef int BOOL;
 #define TRUE    1
 #define FALSE   0
 
-#define BPTREE_MIN_FACTOR_T     5                   // (See Cormen's Introduction to Algorithms, Chapter 18, B Trees) 
+#define BPTREE_MIN_FACTOR_T     1                   // (See Cormen's Introduction to Algorithms, Chapter 18, B Trees) 
 #define BPTREE_MAX_KEYS         ((2 * BPTREE_MIN_FACTOR_T) - 1)
 #define BPTREE_MAX_CHILDREN     (BPTREE_MAX_KEYS + 1)
 

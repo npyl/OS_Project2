@@ -13,7 +13,10 @@ typedef struct stack_s {
     int size;
 } stack;
 
+void*   stack_root(stack*);
 void    stack_init(stack*);
 void*   stack_pop(stack*);
+void*   stack_read_top(stack*);
+void    stack_read_top_revert(stack*);
 void    stack_push(stack*, void*);
 void    stack_deinit(stack*);

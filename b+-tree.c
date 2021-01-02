@@ -1,3 +1,4 @@
+#include <math.h>
 #include <stdio.h>
 #include <malloc.h>
 
@@ -19,10 +20,18 @@
  *      that leaf.
  */
 static stack _leaf_ancestry;
+static int _ancestors_read_count = 0;
 
 bptree_node* get_next_leaf_ancestor()
 {
-    return stack_pop(&_leaf_ancestry);
+    _ancestors_read_count++;
+    return stack_read_top(&_leaf_ancestry);
+}
+
+void revert_ancestry_registry()
+{
+    for (int i = 0; i < _ancestors_read_count; i++)
+        stack_read_top_revert(&_leaf_ancestry);
 }
 
 void create_empty_leaf(bptree_node** new_leaf)
@@ -32,27 +41,178 @@ void create_empty_leaf(bptree_node** new_leaf)
     (*new_leaf)->keys_count         = 0;
     (*new_leaf)->p_rightmost_leaf   = NULL;
 }
-
-void split(bptree_node* leaf, bptree_node* parent, bptree_node** p_new_leaf)
+void create_empty_node(bptree_node** new_node)
 {
-    // create_empty_leaf(*p_new_leaf);
-
-    
+    *new_node = malloc(sizeof(bptree_node));
+    (*new_node)->is_leaf            = FALSE;
+    (*new_node)->keys_count         = 0;
+    (*new_node)->p_rightmost_leaf   = NULL;
 }
 
-void _bptree_insert(int x, bptree_node* leaf, bptree_node* parent, bptree_node** p_new_leaf)
+/* forward declaration */
+void _bptree_insert(int x, bptree_node* node, bptree_node* parent);
+
+/*
+ * split()
+ *
+ * split() handles *both* creating new leaf/node *and* 
+ *      inserting appropriate values. It is used by
+ *      _bptree_insert() and therefore can be called
+ *      multiple times if needed.
+ */
+void split(int x, bptree_node* node, bptree_node* parent, bptree_node** p_new_leaf)
 {
-    if (leaf->keys_count == BPTREE_MAX_KEYS)
+    bptree_node* tree_root = stack_root(&_leaf_ancestry);
+
+    if (node == tree_root)
     {
-        // split(leaf, parent, p_new_leaf);
-        printf("shouldn't go in here!\n");
+        bptree_node* new_root = NULL;
+
+        /* find key to insert to parent */
+        int k = floor(node->keys_count / 2);
+        int split_value = node->keys[k];
+
+        /* indexers for inserting appropriate keys to new_root and new node/leaf */
+        int j = 0;
+        int i = 0;
+
+        /* check if root is the only node (<=> leaf) */
+        if (tree_root->children[0] == NULL)
+        {
+            create_empty_leaf(p_new_leaf);
+            create_empty_leaf(&new_root);
+
+            /* 
+             * root is leaf thus, everything inside it is important; 
+             * make sure to copy it inside new_leaf 
+             */
+            i = k + 1;
+
+            /* remove split_value from old root */
+            tree_root->keys[k] = 0;
+            tree_root->keys_count--;
+
+        }
+        else
+        {
+            create_empty_node(p_new_leaf);
+            create_empty_node(&new_root);
+
+            /* 
+             * contrary to above case, root's keys are merely guides for
+             * tree traversal; we therefore don't need to copy split_value
+             * inside new_node (called new_leaf for convenience inside code). 
+             */
+            i = k;
+        }
+
+        /* insert split_value to new root */
+        _bptree_insert(split_value, new_root, NULL);
+
+        /* move keys */
+        for (; i < tree_root->keys_count; i++)
+        {
+            (*p_new_leaf)->keys[j] = tree_root->keys[i];
+            (*p_new_leaf)->keys_count++;
+
+            tree_root->keys[i] = 0;
+            tree_root->keys_count--;
+
+            j++;
+        }
+
+        /* insert x into the appropriate child */
+        if (x < split_value)
+            _bptree_insert(x, tree_root, NULL);
+        else if (x >= split_value)
+            _bptree_insert(x, *p_new_leaf, NULL);
+
+        /* move children (if there are any) */
+        if (tree_root->children[0] != NULL)
+        {
+            j = 0;
+            i = k + 1;
+
+            for (; i < tree_root->keys_count; i++)
+            {
+                (*p_new_leaf)->children[j] = tree_root->children[i];
+                tree_root->children[i] = NULL;
+
+                j++;
+            }
+        }
+
+        new_root->children[0] = tree_root;
+        new_root->children[1] = *p_new_leaf;
+    }
+    else if (node->is_leaf)
+    {
+        create_empty_leaf(p_new_leaf);
+
+        /* find key to insert to parent */
+        int k = floor(node->keys_count / 2);
+        int split_value = node->keys[k];
+
+        int j = 0;
+        for (int i = k; i < node->keys_count; i++)
+        {
+            (*p_new_leaf)->keys[j] = node->keys[i];
+            (*p_new_leaf)->keys_count++;
+
+            node->keys[i] = 0;
+            node->keys_count--;
+
+            j++;
+        }
+
+        /* insert x to new_leaf */
+        if (x >= split_value)
+            _bptree_insert(x, *p_new_leaf, parent);
+        else if (x < split_value)
+            _bptree_insert(x, node, parent);
+
+        /* get parent's parent; he exists in the ancestry registry */
+        get_next_leaf_ancestor();
+        bptree_node* grandparent = get_next_leaf_ancestor();
+
+        /* now insert split_value to parent */
+        _bptree_insert(split_value, parent, grandparent);
+    }
+    else
+    {
+        bptree_node* new_node;
+
+        create_empty_node(&new_node);
+
+        printf("Internal node splitting!\n");
+    }
+}
+
+void _bptree_insert(int x, bptree_node* node, bptree_node* parent)
+{
+    if (node->keys_count == BPTREE_MAX_KEYS)
+    {
+        if (parent == NULL)
+        {
+            printf("Error(_bptree_insert): parent shouldn't be NULL.\n");
+            return;
+        }
+
+        bptree_node* p_new_node = NULL;
+
+        /* leaf is full; call split to handle both adding x and organising the leaves */
+        split(x, node, parent, &p_new_node);
+        
+        /* we should connect old leaf to new leaf! */
+        if (node->is_leaf)
+            node->p_rightmost_leaf = p_new_node;
     }
     else
     {
         /* position to insert key */
         int i = 0;
 
-        bptree_node* cursor = leaf;
+        bptree_node* cursor = node;
 
         /* find where to put ki */
         if (x < cursor->keys[0])
@@ -161,17 +321,11 @@ BOOL bptree_insert(bptree_node* tree, int x)
     // We have found our leaf
     leaf = cursor;
 
-    bptree_node* p_new_leaf = NULL;
-
     // Now use our internal insert to do the heavy lifting!
-    _bptree_insert(x, leaf, leaf_parent, &p_new_leaf);
+    _bptree_insert(x, leaf, leaf_parent);
 
     // increment keys counter
     leaf->keys_count++;
-
-    // insert() required splitting; we should connect old leaf to new leaf!
-    if (p_new_leaf != NULL)
-        leaf->p_rightmost_leaf = p_new_leaf;
 
     return TRUE;
 }
