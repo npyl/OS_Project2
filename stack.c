@@ -3,43 +3,50 @@
 #include <stdio.h>
 #include <malloc.h>
 
-void stack_init(stack* stack) {
-    stack->root = malloc(sizeof(stack));
-    stack->root->next = NULL;
-    stack->root->data = NULL;
-    stack->size = 1;
+void stack_init(stack* st) {
+    st->root = malloc(sizeof(stack));
+    st->root->next = NULL;
+    st->root->data = NULL;
+    st->size = 1;
 }
 
-void* stack_pop(stack* stack) {
-    stack_node* cursor = stack->root;
+void* stack_pop(stack* st) {
+    stack_node* cursor = st->root;
     stack_node* parent = NULL;
+    void* data;
 
     /* we can't go <= 0; root is sentinel and below zero is irrational! */
-    if (stack->size == 1)
+    if (st->size == 1)
         return NULL;
 
     /* find stack tail */
-    for (int j = 0; j < stack->size; j++)
+    for (int j = 0; j < st->size; j++)
     {
         parent = cursor;
         cursor = cursor->next;
     }
 
+    /*  */
+    data = cursor->data;
+
+    /*  */
+    free(cursor);
+
     /* invalidate tail */
     parent->next = NULL;
 
     /* reduce size */
-    stack->size--;
+    st->size--;
 
-    return cursor;
+    return data;
 }
 
-void stack_push(stack* stack, void* data) {
-    stack_node* cursor = stack->root;
+void stack_push(stack* st, void* data) {
+    stack_node* cursor = st->root;
     stack_node* parent = NULL;
 
     /* find stack tail */
-    for (int j = 0; j < stack->size; j++)
+    for (int j = 0; j < st->size; j++)
     {
         parent = cursor;
         cursor = cursor->next;
@@ -54,14 +61,14 @@ void stack_push(stack* stack, void* data) {
     parent->next = cursor;
 
     /* increase size */
-    stack->size++;
+    st->size++;
 }
 
-void stack_deinit(stack* s) {
+void stack_deinit(stack* st) {
     /* deallocate our stack; should stop when stack_pop() returns NULL; eg. stack is empty */
-    while (stack_pop(s))
+    while (stack_pop(st))
         ;
 
     /* don't forget to free the sentinel! */
-    free(s->root);
+    free(st->root);
 }
