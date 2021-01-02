@@ -125,17 +125,16 @@ bptree_node* bptree_search(bptree_node* node, int value)
      */
     if (value <= node->keys[0])
         return bptree_search(node->children[0], value);
-
     else if ((value > node->keys[0]) && (value < node->keys[node->keys_count - 1]))
     {
-        int i = 1;
+        int i = 0;
         while ((i < node->keys_count) && (value > node->keys[i]))
             i++;
         bptree_search(node->children[i], value);
     }
     else if (value >= node->keys[node->keys_count - 1])
     {
-        return bptree_search(node->children[node->keys_count - 1], value);
+        return bptree_search(node->children[node->keys_count], value);
     }
 
     // else:
@@ -176,13 +175,9 @@ BOOL bptree_insert(bptree_node* tree, int x)
         {
             if (x > cursor->keys[i])
             {
-                cursor = cursor->children[i];
+                cursor = cursor->children[i + 1];
                 break;
             }
-
-            // guard for last element
-            if (i == (cursor->keys_count - 1))
-                cursor = cursor->children[cursor->keys_count];
         }
     }
 
