@@ -80,7 +80,7 @@ void split(int x, bptree_node* node, bptree_node* parent, bptree_node** p_new_le
         if (tree_root->children[0] == NULL)
         {
             create_empty_leaf(p_new_leaf);
-            create_empty_leaf(&new_root);
+            create_empty_node(&new_root);
 
             /* 
              * root is leaf thus, everything inside it is important; 
